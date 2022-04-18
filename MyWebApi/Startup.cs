@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MyWebApi.Configurations;
 using MyWebApi.Data;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,8 @@ namespace MyWebApi
                     );
                 }
                 );
+
+            services.AddAutoMapper(typeof(MapperInitilizer));
 
             services.AddSwaggerGen(c =>
             {
