@@ -21,10 +21,10 @@ namespace MyWebApi.Models
         public int CataLogId { get; set; }
     }
 
-    public class ProductDTO : CreateCataLogDTO
+    public class ProductDTO : CreateProducDTO
     {
         public int Id { get; set; }
 
-        public CataLogDTO CataLog { get; set; }
+        public IList<CataLogDTO>  CataLog { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace MyWebApi.Configurations
             CreateMap<CataLog, CreateCataLogDTO>().ReverseMap();
             CreateMap<Product, ProductDTO>().ReverseMap();
             CreateMap<Product, CreateProducDTO>().ReverseMap();
+            CreateMap<ApiUser, UserDTO>().ReverseMap();
         }
     }
 }

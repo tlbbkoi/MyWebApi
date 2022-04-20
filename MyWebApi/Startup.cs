@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using MyWebApi.Configurations;
 using MyWebApi.Data;
+using MyWebApi.IRepository;
+using MyWebApi.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +37,10 @@ namespace MyWebApi
                 opitions.UseSqlServer(Configuration.GetConnectionString("MyApi"));
             });
 
+            services.AddAuthentication();
+
+            services.ConfigureIdentity();
+
             services.AddControllers();
 
             services.AddCors(o =>
@@ -48,10 +55,16 @@ namespace MyWebApi
 
             services.AddAutoMapper(typeof(MapperInitilizer));
 
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyWebApi", Version = "v1" });
             });
+
+            services.AddControllers().AddNewtonsoftJson(option => 
+                option.SerializerSettings.ReferenceLoopHandling = 
+                Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,6 +90,7 @@ namespace MyWebApi
 
             app.UseEndpoints(endpoints =>
             {
+                
                 endpoints.MapControllers();
             });
         }

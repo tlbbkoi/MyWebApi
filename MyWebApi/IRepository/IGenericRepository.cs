@@ -14,11 +14,11 @@ namespace MyWebApi.IRepository
             List<string> includes = null
             );
 
-        Task<T> Get(Expression<Func<T, bool>> expression, List<string> includes = null);
+        Task<T> GetById(Expression<Func<T, bool>> expression, List<string> includes = null);
 
-        Task Insert(T entity);
+        Task Create(T entity);
 
-        Task InsertRange(IEnumerable<T> entities);
+        Task CreateRange(IEnumerable<T> entities);
 
         Task Delete(int id);
 

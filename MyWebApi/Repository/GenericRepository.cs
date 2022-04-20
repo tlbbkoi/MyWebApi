@@ -30,7 +30,7 @@ namespace MyWebApi.Repository
             _db.RemoveRange(entities);
         }
 
-        public async Task<T> Get(Expression<Func<T, bool>> expression, List<string> includes = null)
+        public async Task<T> GetById(Expression<Func<T, bool>> expression, List<string> includes = null)
         {
             IQueryable<T> query = _db;
 
@@ -68,12 +68,12 @@ namespace MyWebApi.Repository
             return await query.AsNoTracking().ToListAsync();
         }
 
-        public async Task Insert(T entity)
+        public async Task Create(T entity)
         {
             await _db.AddAsync(entity);
         }
 
-        public async Task InsertRange(IEnumerable<T> entities)
+        public async Task CreateRange(IEnumerable<T> entities)
         {
             await _db.AddRangeAsync(entities);
         }
