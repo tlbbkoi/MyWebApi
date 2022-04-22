@@ -13,6 +13,8 @@ using MyWebApi.Configurations;
 using MyWebApi.Data;
 using MyWebApi.IRepository;
 using MyWebApi.Repository;
+using MyWebApi.Services;
+using MyWebApi.Services.MyWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +43,8 @@ namespace MyWebApi
 
             services.ConfigureIdentity();
 
+            services.ConfigureJWT(Configuration);
+
             services.AddControllers();
 
             services.AddCors(o =>
@@ -56,6 +60,8 @@ namespace MyWebApi
             services.AddAutoMapper(typeof(MapperInitilizer));
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IAuthManager, AuthManager>();
 
             services.AddSwaggerGen(c =>
             {

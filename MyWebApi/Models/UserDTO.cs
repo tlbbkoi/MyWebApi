@@ -22,6 +22,8 @@ namespace MyWebApi.Models
 
         [DataType(DataType.PhoneNumber)]
         public string phoneNumber { get; set; }
+
+        public ICollection<string> Roles { get; set; }
         
     }
 }

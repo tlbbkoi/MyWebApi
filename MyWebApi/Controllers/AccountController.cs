@@ -1,10 +1,11 @@
-﻿using AutoMapper;
+﻿    using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyWebApi.Data;
 using MyWebApi.Models;
+using MyWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,12 +20,14 @@ namespace MyWebApi.Controllers
         private readonly UserManager<ApiUser> _userManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
+        private readonly IAuthManager _authManager;
 
-        public AccountController(UserManager<ApiUser> userManager, ILogger<AccountController> logger, IMapper mapper)
+        public AccountController(UserManager<ApiUser> userManager, ILogger<AccountController> logger, IMapper mapper, IAuthManager authManager)
         {
             _userManager = userManager;
             _logger = logger;
             _mapper = mapper;
+            _authManager = authManager;
         }
 
         [HttpPost]
@@ -40,15 +43,18 @@ namespace MyWebApi.Controllers
             {
                 var user = _mapper.Map<ApiUser>(userDTO);
                 user.UserName = userDTO.Email;
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user, userDTO.Password);
                 if (!result.Succeeded)
                 {   
                     foreach(var err in result.Errors)
                     {
                         ModelState.AddModelError(err.Code, err.Description);
                     }
-                    return BadRequest("User Registraion Attempl Failed");
+
+                    return BadRequest(ModelState);
                 }
+                 
+                await _userManager.AddToRolesAsync(user, userDTO.Roles);
                 return Accepted();
             }
             catch (Exception ex)
@@ -59,24 +65,22 @@ namespace MyWebApi.Controllers
             }
         }
 
-        /* [HttpPost]
-         [Route("login")]
-         public async Task<IActionResult> Login([FromBody] LoginUserDTO loginUserDTO)
+       [HttpPost]
+       [Route("login")]
+         public async Task<IActionResult> Login([FromBody] LoginUserDTO userDTO)
          {
-             _logger.LogInformation($"Login Attempl for {loginUserDTO.Email}");
+             _logger.LogInformation($"Login Attempl for {userDTO.Email}");
              if (!ModelState.IsValid)
              {
                  return BadRequest(ModelState);
              }
              try
              {
-                 var result = await _signInManager.PasswordSignInAsync(loginUserDTO.Email, loginUserDTO.Password,false,false);
-
-                 if (!result.Succeeded)
-                 {
-                     return BadRequest("User Login Attempl Failed");
-                 }
-                 return Accepted();
+                 if(!await _authManager.ValidateUser(userDTO))
+                {
+                    return Unauthorized();
+                }
+                  return Accepted(new { Token = await _authManager.CreateToken() });
              }
              catch (Exception ex)
              {
@@ -86,7 +90,7 @@ namespace MyWebApi.Controllers
              }
 
          }
-        */
+        
 
 
 
