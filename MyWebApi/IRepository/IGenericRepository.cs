@@ -14,9 +14,9 @@ namespace MyWebApi.IRepository
             List<string> includes = null
             );
 
-        Task<T> GetById(Expression<Func<T, bool>> expression, List<string> includes = null);
+        Task<T> Get(Expression<Func<T, bool>> expression, List<string> includes = null);
 
-        Task Create(T entity);
+        Task Insert(T entity);
 
         Task CreateRange(IEnumerable<T> entities);
 

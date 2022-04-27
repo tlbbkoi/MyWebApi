@@ -25,6 +25,6 @@ namespace MyWebApi.Models
     {
         public int Id { get; set; }
 
-        public IList<CataLogDTO>  CataLog { get; set; }
+        public IList<CataLogDTO> CataLog { get; set; }
     }
 }

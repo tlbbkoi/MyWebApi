@@ -45,7 +45,7 @@ namespace MyWebApi
 
             services.ConfigureJWT(Configuration);
 
-            services.AddControllers();
+            services.AddRouting(options => options.LowercaseUrls = true);
 
             services.AddCors(o =>
                 {
@@ -88,9 +88,11 @@ namespace MyWebApi
 
             app.UseHttpsRedirection();
 
-            app.UseCors("CorsPolicy");
+            app.UseCors("AllowAll");
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

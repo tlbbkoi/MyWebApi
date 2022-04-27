@@ -36,25 +36,26 @@ namespace MyWebApi.Services
                 var signingCredentials = GetSigningCredentials();
                 var claims = await GetClaims();
                 var token = GenerateTokenOptions(signingCredentials, claims);
-
-                return new JwtSecurityTokenHandler().WriteToken(token);
+                var nToken = new JwtSecurityTokenHandler().WriteToken(token);
+                IsValidToken(nToken);
+                return nToken;
             }
 
             private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
             {
                 var jwtSettings = _configuration.GetSection("Jwt");
 
-                var expiration = DateTime.Now.AddMinutes(Convert.ToDouble(
-                    jwtSettings.GetSection("lifetime").Value));
+                var expiration = DateTime.Now.AddMinutes(
+                    int.Parse(jwtSettings.GetSection("lifetime").Value));
 
                 var token = new JwtSecurityToken(
-                    issuer: jwtSettings.GetSection("validIssuer").Value,
+                    issuer: jwtSettings.GetSection("Issuer").Value,
+                    audience: jwtSettings.GetSection("Audience").Value,
                     claims: claims,
-                    expires: expiration,
+                    expires: DateTime.Now.AddMinutes(30),
                     signingCredentials: signingCredentials
                     );
                 return token;
-
             }
 
             private async Task<List<Claim>> GetClaims()
@@ -63,7 +64,6 @@ namespace MyWebApi.Services
                 {
                     new Claim(ClaimTypes.Name, _user.UserName)
                 };
-                
 
                 var roles = await _userManager.GetRolesAsync(_user);
 
@@ -76,7 +76,8 @@ namespace MyWebApi.Services
 
             private SigningCredentials GetSigningCredentials()
             {
-                var key = Environment.GetEnvironmentVariable("Key");
+                var jwtSettings = _configuration.GetSection("Jwt");
+                var key = jwtSettings.GetSection("Key").Value;
                 var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
                 return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
@@ -88,7 +89,33 @@ namespace MyWebApi.Services
                 return (_user != null && await _userManager.CheckPasswordAsync(_user, userDTO.Password));
             }
 
-        
+            public bool IsValidToken(string token)
+            {
+                var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+                var jwtSettings = _configuration.GetSection("Jwt");
+                try
+                {
+                    jwtSecurityTokenHandler.ValidateToken(token, new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.GetSection("Key").Value)),
+
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtSettings.GetSection("Issuer").Value,
+
+                        ValidateAudience = true,
+                        ValidAudience = jwtSettings.GetSection("Audience").Value,
+
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
+                    }, out var _);
+                    return true;
+                }
+                catch (Exception err) 
+                {
+                    return false;
+                }
+            }
         }
     }
 

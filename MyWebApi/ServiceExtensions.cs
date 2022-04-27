@@ -26,24 +26,28 @@ namespace MyWebApi
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration Configuration)
         {
             var jwtSettings = Configuration.GetSection("Jwt");
-            var key = Environment.GetEnvironmentVariable("Key");
+            var key = jwtSettings.GetSection("Key").Value;
 
             services.AddAuthentication(o =>
             {
                 o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddJwtBearer(o => {
+                .AddJwtBearer(o =>
+                {
+                    o.SaveToken = true;
+                    o.RequireHttpsMetadata = false;
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = false,
+                        ValidateLifetime = false,
+                        ValidateIssuerSigningKey = false,
                         ValidIssuer = jwtSettings.GetSection("Issuer").Value,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-
+                        ValidateAudience = false,
                     };
                 });
+
         }
     }
 }
