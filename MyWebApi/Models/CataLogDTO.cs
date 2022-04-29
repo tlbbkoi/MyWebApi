@@ -8,8 +8,6 @@ namespace MyWebApi.Models
 {
     public class CreateCataLogDTO
     {
-        [Required]
-        [StringLength(maximumLength: 100, ErrorMessage = "CaTalog Product Is Too Log")]
         public string Name { get; set; }
     }
     public class CataLogDTO : CreateCataLogDTO

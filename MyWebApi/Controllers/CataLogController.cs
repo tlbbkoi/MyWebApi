@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,38 +31,26 @@ namespace MyWebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCataLogs()
+        [HttpCacheExpiration(CacheLocation= CacheLocation.Public,MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = false)]
+        public async Task<IActionResult> GetCataLogs([FromQuery] RequestParams requestParams) 
         {
-            try
-            {
-                var cataLogs = await _unitOfWork.CataLogs.GetAll();
+                var cataLogs = await _unitOfWork.CataLogs.GetPagedList(requestParams);
                 var results = _mapper.Map<IList<CataLogDTO>>(cataLogs);
                 return Ok(results);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex,$"Error in the {nameof(GetCataLogs)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
         
         [HttpGet ("{id}")]
-        
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = false)]
 
-        public async Task<IActionResult> GetByIdCataLog([FromQuery] int id)
+
+        public async Task<IActionResult> GetByIdCataLog(int id)
         {
-            try
-            {
-                var cataLog = await _unitOfWork.Products.Get(cl => cl.Id == id);
+                var cataLog = await _unitOfWork.CataLogs.Get(cl => cl.Id == id);
                 var result = _mapper.Map<CataLogDTO>(cataLog);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(GetByIdCataLog)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
         [HttpPost]
@@ -69,24 +58,11 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> CreateCataLog([FromBody] CreateCataLogDTO cataLogDTO)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError($"Invalid Post attempt in {nameof(CreateCataLog)}");
-                return BadRequest(ModelState);
-            }
-            try
-            {
                 var cataLog = _mapper.Map<CataLog>(cataLogDTO);
                 await _unitOfWork.CataLogs.Insert(cataLog);
                 await _unitOfWork.Save();
 
                 return Ok(cataLog);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(CreateCataLog)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
         [HttpPut("{id}")]
@@ -95,14 +71,6 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> UpdateCataLog(int id, [FromBody] CreateCataLogDTO cataLogDTO)
         {
-            if (!ModelState.IsValid || id < 1)
-            {
-                _logger.LogError($"Invalid Post attempt in {nameof(UpdateCataLog)}");
-
-                return BadRequest(ModelState);
-            }
-            try
-            {
                 var cataLog = await _unitOfWork.CataLogs.Get(pt => pt.Id == id);
                 if (cataLog == null)
                 {
@@ -117,12 +85,6 @@ namespace MyWebApi.Controllers
 
                     return NoContent();
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(UpdateCataLog)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
         [HttpDelete("{id}")]
@@ -130,13 +92,6 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> DeleteCataLog(int id)
         {
-            if (!ModelState.IsValid || id < 1)
-            {
-                _logger.LogError($"Invalid Post attempt in {nameof(DeleteCataLog)}");
-                return BadRequest(ModelState);
-            }
-            try
-            {
                 var product = await _unitOfWork.Products.Get(pt => pt.Id == id);
                 if (product == null)
                 {
@@ -150,12 +105,6 @@ namespace MyWebApi.Controllers
 
                     return NoContent();
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(DeleteCataLog)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
     }

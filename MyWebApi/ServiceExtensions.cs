@@ -1,9 +1,18 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AspNetCoreRateLimit;
+using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MyWebApi.Data;
+using MyWebApi.Models;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,5 +58,44 @@ namespace MyWebApi
                 });
 
         }
+
+        public static void ConfingureExceptionHandler(this IApplicationBuilder app)
+        {
+            app.UseExceptionHandler(error => {
+                error.Run(async context => {
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    context.Response.ContentType = "application/json";
+                    var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    if (contextFeature != null)
+                    {
+                        Log.Error($"Error in the {contextFeature.Error}");
+
+                        await context.Response.WriteAsync(new Error
+                        {
+                            Statuscode = context.Response.StatusCode,
+                            Message = "Internal Server Error. Please Try Again Later.",
+                        }.ToString());
+                    }
+                });
+            });
+        }
+
+        public static void ConfingureHttpCacheHeaders(this IServiceCollection services)
+        {
+            services.AddResponseCaching();
+            services.AddHttpCacheHeaders(
+                (expirationOpt) =>
+                    {
+                        expirationOpt.MaxAge = 180;
+                        expirationOpt.CacheLocation = CacheLocation.Private;
+                    },
+                (validationOpt) =>
+                    {
+                        validationOpt.MustRevalidate = true;
+                    }
+                );
+        }
+
+
     }
 }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyWebApi.Data;
 
 namespace MyWebApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220428090238_test3")]
+    partial class test3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,15 +50,15 @@ namespace MyWebApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8daeb736-dc06-4258-a6a1-003b88f70e52",
-                            ConcurrencyStamp = "0933fdf3-1e44-4600-a09e-0589a37dd3ad",
+                            Id = "9cb73954-509b-4ee6-a225-76cc07d2d2f2",
+                            ConcurrencyStamp = "e9de477d-720e-45e2-a8f5-18a83b811e6a",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "4fc8d451-efc3-4bce-a563-3b502eabf591",
-                            ConcurrencyStamp = "86a94d38-727a-4671-98f7-b226f80577b9",
+                            Id = "c2f080af-f206-43d9-803e-7afd26fa8369",
+                            ConcurrencyStamp = "f55fd3f4-265a-4b3f-bc83-b939e836b76f",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         });
@@ -244,10 +246,15 @@ namespace MyWebApi.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("CataLogId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CataLogId");
 
                     b.ToTable("CataLogs");
 
@@ -291,9 +298,12 @@ namespace MyWebApi.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CataLogId");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Products");
 
@@ -387,18 +397,26 @@ namespace MyWebApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyWebApi.Data.CataLog", b =>
+                {
+                    b.HasOne("MyWebApi.Data.CataLog", null)
+                        .WithMany("CataLogs")
+                        .HasForeignKey("CataLogId");
+                });
+
             modelBuilder.Entity("MyWebApi.Data.Product", b =>
                 {
-                    b.HasOne("MyWebApi.Data.CataLog", "CataLog")
+                    b.HasOne("MyWebApi.Data.Product", null)
                         .WithMany("Products")
-                        .HasForeignKey("CataLogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CataLog");
+                        .HasForeignKey("ProductId");
                 });
 
             modelBuilder.Entity("MyWebApi.Data.CataLog", b =>
+                {
+                    b.Navigation("CataLogs");
+                });
+
+            modelBuilder.Entity("MyWebApi.Data.Product", b =>
                 {
                     b.Navigation("Products");
                 });

@@ -1,3 +1,6 @@
+using AspNetCoreRateLimit;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,7 +14,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using MyWebApi.Configurations;
 using MyWebApi.Data;
+using MyWebApi.FluentValidations;
 using MyWebApi.IRepository;
+using MyWebApi.Models;
 using MyWebApi.Repository;
 using MyWebApi.Services;
 using MyWebApi.Services.MyWebApi.Services;
@@ -38,6 +43,10 @@ namespace MyWebApi
             {
                 opitions.UseSqlServer(Configuration.GetConnectionString("MyApi"));
             });
+
+            services.AddMemoryCache();
+
+            services.ConfingureHttpCacheHeaders();
 
             services.AddAuthentication();
 
@@ -68,9 +77,18 @@ namespace MyWebApi
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyWebApi", Version = "v1" });
             });
 
-            services.AddControllers().AddNewtonsoftJson(option => 
+            services.AddControllers(config => {
+                config.CacheProfiles.Add("180SecondDuration", new CacheProfile
+                {
+                    Duration = 180,
+                });
+                }).AddNewtonsoftJson(option => 
                 option.SerializerSettings.ReferenceLoopHandling = 
-                Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+                Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CataLogValidation>());;
+
+            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,9 +104,15 @@ namespace MyWebApi
 
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApi v1"));
 
+            app.ConfingureExceptionHandler();
+
             app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
+
+            app.UseResponseCaching();
+
+            app.UseHttpCacheHeaders();
 
             app.UseRouting();
 

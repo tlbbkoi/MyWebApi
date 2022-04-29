@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,38 +30,26 @@ namespace MyWebApi.Controllers
         }
 
         [HttpGet]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = false)]
         public async Task<IActionResult> GetProducts()
         {
-            try
-            {
                 var products = await _unitOfWork.Products.GetAll();
                 var result = _mapper.Map<IList<ProductDTO>>(products);
                 return Ok(result);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(GetProducts)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
         [HttpGet ("{id}")]
-        
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = false)]
+
 
         public async Task<IActionResult> GetByIdProduct(int id)
         {
-            try
-            {
                 var product = await _unitOfWork.Products.Get(pt => pt.Id == id);
                 
                 var result = _mapper.Map<ProductDTO>(product);
                 return Ok(result);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(GetByIdProduct)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
         }
 
         [HttpPost]
@@ -93,14 +82,6 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProducDTO productDTO)
         {
-            if (!ModelState.IsValid || id < 1)
-            {
-                _logger.LogError($"Invalid Post attempt in {nameof(UpdateProduct)}");
-
-                return BadRequest(ModelState);
-            }
-            try
-            {
                 var product = await _unitOfWork.Products.Get(pt => pt.Id == id);
                 if(product == null)
                 {
@@ -115,12 +96,7 @@ namespace MyWebApi.Controllers
 
                     return Ok(product);
                 }
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(UpdateProduct)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
+
         }
 
         [HttpDelete ("{id}")]
@@ -133,8 +109,6 @@ namespace MyWebApi.Controllers
                 _logger.LogError($"Invalid Post attempt in {nameof(DeleteProduct)}");
                 return BadRequest(ModelState);
             }
-            try
-            {
                 var product = await _unitOfWork.Products.Get(pt => pt.Id == id);
                 if(product == null)
                 {
@@ -147,13 +121,7 @@ namespace MyWebApi.Controllers
                     await _unitOfWork.Save();
 
                     return NoContent();
-                }
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(DeleteProduct)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
+                } 
         }
     }
 }
