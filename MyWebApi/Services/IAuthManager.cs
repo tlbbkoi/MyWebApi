@@ -8,7 +8,13 @@ namespace MyWebApi.Services
 {
     public interface IAuthManager
     {
-        Task<bool> ValidateUser(LoginUserDTO userDTO);
+        Task<string> Login(LoginUserDTO userDTO);
         Task<string> CreateToken();
+        Task<bool> Register(UserDTO userDTO);
+        Task<string> Logout();
+        Task<string> ConfimedEmail(string userId, string token);
+        Task<string> ForgotPassword(string email);
+        Task<string> ResetPassword(string token, ResetPassword resetPassword);
+        
     }
 }

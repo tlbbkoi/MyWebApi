@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MyWebApi.Models;
+using MyWebApi.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace MyWebApi.FluentValidations
     {
         public CataLogValidation()
         {
-            RuleFor(x => x.Name).NotEmpty().MaximumLength(100).WithMessage("CaTalog Product Is Too Log");
+            RuleFor(x => x.Name).NotEmpty().MaximumLength(100).WithMessage(string.Format(Resource.VALIDATION_NOT_EMPTY,"Tên"));
         }
     }
 }

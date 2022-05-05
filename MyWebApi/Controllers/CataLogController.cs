@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using MyWebApi.Data;
 using MyWebApi.IRepository;
 using MyWebApi.Models;
+using MyWebApi.Properties;
+using MyWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,25 +21,19 @@ namespace MyWebApi.Controllers
     
     public class CataLogController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<CataLogController> _logger;
-        private readonly IMapper _mapper;
+        private readonly ICataLogRespository _cataLogRespository;
 
-        public CataLogController(IUnitOfWork unitOfWork, ILogger<CataLogController> logger, IMapper mapper)
+        public CataLogController(ICataLogRespository cataLogRespository)
         {
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _mapper = mapper;
+            _cataLogRespository = cataLogRespository;
         }
-
         [HttpGet]
         [HttpCacheExpiration(CacheLocation= CacheLocation.Public,MaxAge = 60)]
         [HttpCacheValidation(MustRevalidate = false)]
         public async Task<IActionResult> GetCataLogs([FromQuery] RequestParams requestParams) 
         {
-                var cataLogs = await _unitOfWork.CataLogs.GetPagedList(requestParams);
-                var results = _mapper.Map<IList<CataLogDTO>>(cataLogs);
-                return Ok(results);
+            var results = await _cataLogRespository.GetCataLogs(requestParams);
+            return Ok(new Repsonse(Resource.GET_SUCCESS, requestParams, results));
         }
 
         
@@ -48,9 +44,8 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> GetByIdCataLog(int id)
         {
-                var cataLog = await _unitOfWork.CataLogs.Get(cl => cl.Id == id);
-                var result = _mapper.Map<CataLogDTO>(cataLog);
-                return Ok(result);
+            var result = await _cataLogRespository.GetCataLog(id);
+            return Ok(new Repsonse(Resource.GET_SUCCESS, new { id = id }, result));
         }
 
         [HttpPost]
@@ -58,11 +53,8 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> CreateCataLog([FromBody] CreateCataLogDTO cataLogDTO)
         {
-                var cataLog = _mapper.Map<CataLog>(cataLogDTO);
-                await _unitOfWork.CataLogs.Insert(cataLog);
-                await _unitOfWork.Save();
-
-                return Ok(cataLog);
+            var result = await _cataLogRespository.CreateCataLog(cataLogDTO);
+            return Ok(new Repsonse(Resource.CREATE_SUCCESS, null, result));
         }
 
         [HttpPut("{id}")]
@@ -71,20 +63,8 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> UpdateCataLog(int id, [FromBody] CreateCataLogDTO cataLogDTO)
         {
-                var cataLog = await _unitOfWork.CataLogs.Get(pt => pt.Id == id);
-                if (cataLog == null)
-                {
-                    _logger.LogError($"Invalid Update attemp in {nameof(UpdateCataLog)}");
-                    return BadRequest("Submitted data is invalid");
-                }
-                else
-                {
-                    _mapper.Map(cataLogDTO, cataLog);
-                    _unitOfWork.CataLogs.Update(cataLog);
-                    await _unitOfWork.Save();
-
-                    return NoContent();
-                }
+            var result = await _cataLogRespository.UpdateCataLog(id, cataLogDTO);
+            return Ok(new Repsonse(result));
         }
 
         [HttpDelete("{id}")]
@@ -92,19 +72,8 @@ namespace MyWebApi.Controllers
 
         public async Task<IActionResult> DeleteCataLog(int id)
         {
-                var product = await _unitOfWork.Products.Get(pt => pt.Id == id);
-                if (product == null)
-                {
-                    _logger.LogError($"Invalid Delete attemp in {nameof(DeleteCataLog)}");
-                    return BadRequest("Submitted data is invalid");
-                }
-                else
-                {
-                    await _unitOfWork.CataLogs.Delete(id);
-                    await _unitOfWork.Save();
-
-                    return NoContent();
-                }
+            var result = await _cataLogRespository.DeleteCataLog(id);
+            return Ok(new Repsonse(result));
         }
 
     }

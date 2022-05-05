@@ -1,10 +1,12 @@
 ﻿    using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyWebApi.Data;
 using MyWebApi.Models;
+using MyWebApi.Properties;
 using MyWebApi.Services;
 using System;
 using System.Collections.Generic;
@@ -17,16 +19,11 @@ namespace MyWebApi.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<ApiUser> _userManager;
-        private readonly ILogger<AccountController> _logger;
-        private readonly IMapper _mapper;
+        
         private readonly IAuthManager _authManager;
 
-        public AccountController(UserManager<ApiUser> userManager, ILogger<AccountController> logger, IMapper mapper, IAuthManager authManager)
+        public AccountController(IAuthManager authManager)
         {
-            _userManager = userManager;
-            _logger = logger;
-            _mapper = mapper;
             _authManager = authManager;
         }
 
@@ -34,65 +31,52 @@ namespace MyWebApi.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] UserDTO userDTO)
         {
-            _logger.LogInformation($"Registration Attempl for {userDTO.Email}");
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var user = _mapper.Map<ApiUser>(userDTO);
-                user.UserName = userDTO.Email;
-                var result = await _userManager.CreateAsync(user, userDTO.Password);
-                if (!result.Succeeded)
-                {   
-                    foreach(var err in result.Errors)
-                    {
-                        ModelState.AddModelError(err.Code, err.Description);
-                    }
-
-                    return BadRequest(ModelState);
-                }
-                 
-                await _userManager.AddToRolesAsync(user, userDTO.Roles);
-                return Accepted();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error in the {nameof(Register)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-
-            }
+            var resuft = await _authManager.Register(userDTO);
+            return Ok(new Repsonse(Resource.REGISTER_SUCCESS));
         }
 
+       
        [HttpPost]
        [Route("login")]
          public async Task<IActionResult> Login([FromBody] LoginUserDTO userDTO)
          {
-             _logger.LogInformation($"Login Attempl for {userDTO.Email}");
-             if (!ModelState.IsValid)
-             {
-                 return BadRequest(ModelState);
-             }
-             try
-             {
-                 if(!await _authManager.ValidateUser(userDTO))
-                {
-                    return Unauthorized();
-                }
-                  return Accepted(new { Token = await _authManager.CreateToken() });
-             }
-             catch (Exception ex)
-             {
-                 _logger.LogError(ex, $"Error in the {nameof(Login)}");
-                 return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-
-             }
+            var result = await _authManager.Login(userDTO);
+            return Ok(new Repsonse(Resource.LOGIN_SUCCESS, null, new { Token = result }));
 
          }
-        
 
+       [HttpGet]
+       [Route("logout")]
 
+       public async Task<IActionResult> Logout()
+        {
+            var result = await _authManager.Logout();
+            return Ok(new Repsonse(result));
+        }
 
+        [HttpGet]
+        [Route("confirmedemail")]
+        public async Task<IActionResult> ConfirmedEmail(string id, string token)
+        {
+            var result = await _authManager.ConfimedEmail(id, token);
+            return Ok(new Repsonse(result));
+        }
+
+        [HttpPost]
+        [Route("forgotpassword")]
+        public async Task<IActionResult> ForgotPassWord(string email)
+        {
+            var result = await _authManager.ForgotPassword(email);
+            return Ok(new Repsonse(result));
+
+        }
+
+        [HttpPost]
+        [Route("resetpassword")]
+        public async Task<IActionResult> ResetPassword(string token, [FromBody] ResetPassword resetPassword)
+        {
+            var result = await _authManager.ResetPassword(token, resetPassword);
+            return Ok(new Repsonse(result));
+        }
     }
 }

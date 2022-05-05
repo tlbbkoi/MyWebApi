@@ -16,10 +16,10 @@ using MyWebApi.Configurations;
 using MyWebApi.Data;
 using MyWebApi.FluentValidations;
 using MyWebApi.IRepository;
+using MyWebApi.Mail;
 using MyWebApi.Models;
 using MyWebApi.Repository;
 using MyWebApi.Services;
-using MyWebApi.Services.MyWebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +70,14 @@ namespace MyWebApi
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IAuthManager, AuthManager>();
+            services.ConfigureServiceHandler();
+
+
+            services.AddOptions();
+            var mailsettings = Configuration.GetSection("Mailsettings");
+            services.Configure<MailSettings>(mailsettings);
+            services.AddTransient<ISendMailService, SendMailService>();
+
 
             services.AddSwaggerGen(c =>
             {
@@ -87,7 +94,13 @@ namespace MyWebApi
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CataLogValidation>());;
 
-            
+            services.Configure<IdentityOptions>(opt =>
+            {
+                opt.User.RequireUniqueEmail = true;
+                opt.SignIn.RequireConfirmedEmail = true;
+                opt.SignIn.RequireConfirmedPhoneNumber = false;
+
+            });
 
         }
 
@@ -102,7 +115,10 @@ namespace MyWebApi
 
             app.UseSwagger();
 
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApi v1"));
+            app.UseSwaggerUI(c => {
+                string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
+                c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "MyWebApi v1");
+            });
 
             app.ConfingureExceptionHandler();
 
@@ -122,8 +138,8 @@ namespace MyWebApi
 
             app.UseEndpoints(endpoints =>
             {
-                
                 endpoints.MapControllers();
+                
             });
         }
     }

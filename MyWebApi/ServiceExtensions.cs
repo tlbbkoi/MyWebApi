@@ -11,7 +11,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MyWebApi.Data;
+using MyWebApi.Mail;
 using MyWebApi.Models;
+using MyWebApi.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -95,6 +97,14 @@ namespace MyWebApi
                     }
                 );
         }
+
+        public static void ConfigureServiceHandler(this IServiceCollection services)
+        {
+            services.AddScoped<IAuthManager, AuthManager>();
+            services.AddTransient<ICataLogRespository, CataLogRepository>();
+            services.AddTransient<IProductRespository, ProductRespository>();
+        }
+
 
 
     }

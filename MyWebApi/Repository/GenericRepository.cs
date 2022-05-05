@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using MyWebApi.Data;
 using MyWebApi.IRepository;
 using System;
@@ -20,6 +21,7 @@ namespace MyWebApi.Repository
             _context = context;
             _db = _context.Set<T>();
         }
+
         public async Task Delete(int id)
         {
             var entity = await _db.FindAsync(id);
@@ -31,21 +33,18 @@ namespace MyWebApi.Repository
             _db.RemoveRange(entities);
         }
 
-        public async Task<T> Get(Expression<Func<T, bool>> expression, List<string> includes = null)
+        public async Task<T> Get(Expression<Func<T, bool>> expression, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
         {
             IQueryable<T> query = _db;
-
-            if(includes != null)
+            if (include != null)
             {
-                foreach(var includePropery in includes)
-                {
-                    query = query.Include(includePropery);
-                }
+                query = include(query);
             }
+
             return await query.AsNoTracking().FirstOrDefaultAsync(expression);
         }
 
-        public async Task<IList<T>> GetAll(Expression<Func<T, bool>> expression = null, Func<IQueryable<T>, IOrderedQueryable<T>> oderBy = null, List<string> includes = null)
+        public async Task<IList<T>> GetAll(Expression<Func<T, bool>> expression = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, List<string> includes = null)
         {
             IQueryable<T> query = _db;
 
@@ -62,11 +61,26 @@ namespace MyWebApi.Repository
                 }
             }
 
-            if(oderBy != null)
+            if (orderBy != null)
             {
-                query = oderBy(query);
+                query = orderBy(query);
             }
+
             return await query.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<X.PagedList.IPagedList<T>> GetPagedList(RequestParams requestParams, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+        {
+            IQueryable<T> query = _db;
+
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.AsNoTracking()
+                .ToPagedListAsync(requestParams.PageNumber, requestParams.PageSize);
         }
 
         public async Task Insert(T entity)
@@ -74,7 +88,7 @@ namespace MyWebApi.Repository
             await _db.AddAsync(entity);
         }
 
-        public async Task CreateRange(IEnumerable<T> entities)
+        public async Task InsertRange(IEnumerable<T> entities)
         {
             await _db.AddRangeAsync(entities);
         }
@@ -83,23 +97,6 @@ namespace MyWebApi.Repository
         {
             _db.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
-        }
-
-        public async Task<IPagedList<T>> GetPagedList(RequestParams requestParams = null ,List<string> includes = null)
-        {
-            IQueryable<T> query = _db;
-
-
-            if (includes != null)
-            {
-                foreach (var includePropery in includes)
-                {
-                    query = query.Include(includePropery);
-                }
-            }
-
-            return await query.AsNoTracking()
-                .ToPagedListAsync(requestParams.PageNumber, requestParams.PageSize);
         }
     }
 }
