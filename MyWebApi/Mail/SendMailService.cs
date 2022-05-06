@@ -24,8 +24,6 @@ namespace MyWebApi.Mail
 
     public interface ISendMailService
     {
-        Task SendMail(MailModel mailModel);
-
         Task SendEmailAsync(string email, string subject, string body);
     }
     public class SendMailService : ISendMailService
@@ -37,29 +35,18 @@ namespace MyWebApi.Mail
             _mailsettings = mailSettings;
         }
 
-       
         public async Task SendEmailAsync(string toEmail, string subject, string body)
-        {
-            await SendMail(new MailModel()
-            {
-                To = toEmail,
-                Subject = subject,
-                Body = body,
-            });
-        }
-
-        public async Task SendMail(MailModel mailModel)
         {
             var email = new MimeMessage();
 
             email.Sender = new MailboxAddress(_mailsettings.Value.DisplayName, _mailsettings.Value.UserName);
             email.From.Add(new MailboxAddress(_mailsettings.Value.DisplayName, _mailsettings.Value.UserName));
-            email.To.Add(MailboxAddress.Parse(mailModel.To));
-            email.Subject = mailModel.Subject;
+            email.To.Add(MailboxAddress.Parse(toEmail));
+            email.Subject = subject;
 
             var builder = new BodyBuilder();
 
-            builder.HtmlBody = mailModel.Body;
+            builder.HtmlBody = body;
 
             email.Body = builder.ToMessageBody();
 

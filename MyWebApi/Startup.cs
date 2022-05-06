@@ -73,10 +73,7 @@ namespace MyWebApi
             services.ConfigureServiceHandler();
 
 
-            services.AddOptions();
-            var mailsettings = Configuration.GetSection("Mailsettings");
-            services.Configure<MailSettings>(mailsettings);
-            services.AddTransient<ISendMailService, SendMailService>();
+            services.ConfigureEmailService(Configuration);
 
 
             services.AddSwaggerGen(c =>

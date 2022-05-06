@@ -105,7 +105,13 @@ namespace MyWebApi
             services.AddTransient<IProductRespository, ProductRespository>();
         }
 
-
+        public static void ConfigureEmailService(this IServiceCollection services, IConfiguration Configuration)
+        {
+            services.AddOptions();
+            var mailsettings = Configuration.GetSection("Mailsettings");
+            services.Configure<MailSettings>(mailsettings);
+            services.AddTransient<ISendMailService, SendMailService>();
+        }
 
     }
 }
