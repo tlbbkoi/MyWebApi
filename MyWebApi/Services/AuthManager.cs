@@ -160,7 +160,7 @@ namespace MyWebApi.Services
             var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
-            string url = $"{_configuration["AppUrl"]}/api/account/confirmedemail?userId={user.Id}&token={validEmailToken}";
+            string url = $"{_configuration["AppUrl"]}/api/account/confirmedemail?id={user.Id}&token={validEmailToken}";
             
             await _sendMailService.SendEmailAsync("tlbbkoi1996@gmail.com",Resource.VERIFICATION_REQUIRED , $"{url}");
             
