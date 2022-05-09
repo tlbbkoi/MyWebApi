@@ -14,7 +14,9 @@ namespace MyWebApi.FluentValidations
         {
             RuleFor(x => x.Email).NotEmpty().WithMessage(string.Format(Resource.VALIDATION_NOT_EMPTY, "Email"))
                 .EmailAddress().WithMessage(string.Format(Resource.VALIDATION_DISPLAY, "Email"));
-            RuleFor(x => x.Password).NotEmpty().WithMessage(string.Format(Resource.VALIDATION_NOT_EMPTY, "Password"));
+            RuleFor(x => x.Password).NotEmpty().WithMessage(string.Format(Resource.VALIDATION_NOT_EMPTY, "Password"))
+                .MinimumLength(8).WithMessage(string.Format(Resource.MIN_LENGTH,8))
+                ;
         }
     }
 

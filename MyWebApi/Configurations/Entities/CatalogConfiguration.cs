@@ -29,6 +29,7 @@ namespace MyWebApi.Configurations.Entities
                     Name = "Mobie Phone"
                 }
                 );
+            builder.HasKey(s => s.Id);
                 
             }
         }

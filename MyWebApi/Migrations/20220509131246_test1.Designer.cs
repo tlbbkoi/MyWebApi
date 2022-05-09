@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyWebApi.Data;
 
 namespace MyWebApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220509131246_test1")]
+    partial class test1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,15 +50,15 @@ namespace MyWebApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "9cc7bd23-9fce-4687-84e7-94c531d1b2b4",
-                            ConcurrencyStamp = "ef0c5acf-4377-45d9-8c54-a2c5845a2571",
+                            Id = "8b242cc8-dd9c-4f9a-b071-aaa5af49af5e",
+                            ConcurrencyStamp = "a1e45c1d-5b1b-4944-8681-89a0e1428275",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "87377e25-a032-4796-96e2-33de30ec0c53",
-                            ConcurrencyStamp = "e2211fbc-b90d-46ea-a3ac-aab97b660d1f",
+                            Id = "ed3086c9-3443-4d25-9ed6-4b6fa1631a63",
+                            ConcurrencyStamp = "9608524d-0cd9-4feb-8c3d-99b239b71430",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         });

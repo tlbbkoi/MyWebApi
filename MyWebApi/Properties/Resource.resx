@@ -132,6 +132,9 @@
   <data name="CREATE_SUCCESS" xml:space="preserve">
     <value>Khởi tạo thành công.</value>
   </data>
+  <data name="DATA_IS_REQUIRED" xml:space="preserve">
+    <value>Bắt buộc phải có dữ diệu</value>
+  </data>
   <data name="DELETE_FAIL" xml:space="preserve">
     <value>Xóa thất bại.</value>
   </data>
@@ -164,6 +167,9 @@
   </data>
   <data name="LOGOUT_SUCCESS" xml:space="preserve">
     <value>Đăng xuất thành công.</value>
+  </data>
+  <data name="MIN_LENGTH" xml:space="preserve">
+    <value>Không đủ kí tự</value>
   </data>
   <data name="NOT_ACCOUNT" xml:space="preserve">
     <value>Tài khoản không tồn tại.</value>

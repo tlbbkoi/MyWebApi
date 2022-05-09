@@ -50,6 +50,9 @@ namespace MyWebApi.Configurations.Entities
                     CataLogId = 3,
                 }
                 );
+            builder.HasKey(s => s.Id);
+            builder.HasOne(b => b.CataLog).WithMany(a => a.Products).HasForeignKey(s => s.CataLogId);
         }
+        
     }
 }

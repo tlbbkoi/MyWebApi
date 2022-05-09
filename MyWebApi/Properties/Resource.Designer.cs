@@ -106,6 +106,15 @@ namespace MyWebApi.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bắt buộc phải có dữ diệu.
+        /// </summary>
+        public static string DATA_IS_REQUIRED {
+            get {
+                return ResourceManager.GetString("DATA_IS_REQUIRED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Xóa thất bại..
         /// </summary>
         public static string DELETE_FAIL {
@@ -201,6 +210,15 @@ namespace MyWebApi.Properties {
         public static string LOGOUT_SUCCESS {
             get {
                 return ResourceManager.GetString("LOGOUT_SUCCESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Không đủ kí tự.
+        /// </summary>
+        public static string MIN_LENGTH {
+            get {
+                return ResourceManager.GetString("MIN_LENGTH", resourceCulture);
             }
         }
         

@@ -14,7 +14,6 @@ namespace MyWebApi.Data
         public string Context { get; set; }
         public byte Discount { get; set; }
 
-        [ForeignKey(nameof(CataLog))]
 
         public int CataLogId { get; set; }
         public CataLog CataLog { get; set; }

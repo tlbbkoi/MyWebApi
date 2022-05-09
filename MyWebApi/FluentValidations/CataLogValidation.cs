@@ -12,7 +12,7 @@ namespace MyWebApi.FluentValidations
     {
         public CataLogValidation()
         {
-            RuleFor(x => x.Name).NotEmpty().MaximumLength(100).WithMessage(string.Format(Resource.VALIDATION_NOT_EMPTY,"Tên"));
+            RuleFor(x => x.Name).NotEmpty().WithMessage(Resource.DATA_IS_REQUIRED).MaximumLength(100).WithMessage(string.Format(Resource.VALIDATION_NOT_EMPTY,"Tên"));
         }
     }
 }
