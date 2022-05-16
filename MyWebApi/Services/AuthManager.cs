@@ -162,7 +162,7 @@ namespace MyWebApi.Services
             var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
             string url = $"{_configuration["AppUrl"]}/api/account/confirmedemail?id={user.Id}&token={validEmailToken}";
             
-            await _sendMailService.SendEmailAsync("tlbbkoi1996@gmail.com",Resource.VERIFICATION_REQUIRED , $"{url}");
+            await _sendMailService.SendEmailAsync(userDTO.Email,Resource.VERIFICATION_REQUIRED , $"{url}");
             
 
             await _userManager.AddToRolesAsync(user, userDTO.Roles);
